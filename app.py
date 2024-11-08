@@ -14,15 +14,9 @@ df = download_and_organize_data(tickers, start_date, end_date, interval) # downl
 day_truncate(df) # truncate datetime values to day level
 summarize_data(df) # summarize data in terminal for debugging purposes
 
-aapl_df = extract_stock_data(df, 'AAPL') # extract data for a single stock
-summarize_data(aapl_df)
+aapl_df = extract_and_clean_data(df, 'AAPL') # extract and clean data for Apple
+googl_df = extract_and_clean_data(df, 'GOOGL') # extract and clean data for Alphabet
+wmt_df = extract_and_clean_data(df, 'WMT') # extract and clean data for Walmart
 
-# check to make sure all rows in the dataframe have the same ticker value
-check_header_consistency(aapl_df)
-check_ticker_consistency(aapl_df, 'AAPL')
+print(correlation_matrix([aapl_df, googl_df, wmt_df]))
 
-aapl_df = forward_fill_missing_values(aapl_df) # forward fill missing values
-aapl_df = add_closing_returns(aapl_df) # add closing returns
-aapl_df = add_money_flow(aapl_df) # add money flow (trading volume in dollars estimated with closing price and share volume)
-
-visualize_closing_price_over_time(aapl_df) # visualize closing price over time

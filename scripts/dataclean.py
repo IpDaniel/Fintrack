@@ -60,3 +60,16 @@ def add_money_flow(df):
     df = df.copy()
     df.loc[:, 'Money_Flow'] = df['Volume'] * df['Close']
     return df
+
+# Extract and clean data for a specific stock
+def extract_and_clean_data(df, ticker):
+    stock_df = extract_stock_data(df, ticker=ticker) # extract data for a single stock
+
+    # check to make sure all rows in the dataframe have the same ticker value
+    check_header_consistency(stock_df)
+    check_ticker_consistency(stock_df, ticker=ticker)
+
+    stock_df = forward_fill_missing_values(stock_df) # forward fill missing values
+    stock_df = add_closing_returns(stock_df) # add closing returns
+    stock_df = add_money_flow(stock_df) # add money flow (trading volume in dollars estimated with closing price and share volume)
+    return stock_df

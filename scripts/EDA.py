@@ -1,16 +1,9 @@
-"""
-Requirements:
-3.1 Visualize the closing price and daily returns using line plots.
-3.2 Calculate and plot basic summary statistics like mean, median, variance, and standard deviation for stock prices and returns.
-3.3 Create a correlation matrix to see the relationships between the selected stocks.
-"""
-
 import pandas as pd
 import matplotlib.pyplot as plt
 import seaborn as sns
 
-
-def visualize_closing_price_over_time(df):
+# calculate and plot closing and returns over time with dual y-axis graph
+def visualize_closing_and_returns(df):
     # Create figure and axis objects with a single subplot
     fig, ax1 = plt.subplots(figsize=(12, 6))
 
@@ -39,3 +32,52 @@ def visualize_closing_price_over_time(df):
 
     plt.tight_layout()
     plt.show()
+
+# check if the date range exists in the dataframe
+def date_range_in_df(df, from_date, to_date):
+    # Check if the date range exists in the dataframe
+    min_date = df['Date'].min()
+    max_date = df['Date'].max()
+    return from_date >= min_date and to_date <= max_date and from_date <= to_date
+
+# calculate mean, median, variance, and std dev for closing price over a given date range
+def calculate_mean(df, from_date, to_date):
+    return df[df['Date'] >= from_date][df['Date'] <= to_date]['Close'].mean()
+
+# calculate median for closing price over a given date range
+def calculate_median(df, from_date, to_date):
+    return df[df['Date'] >= from_date][df['Date'] <= to_date]['Close'].median() 
+
+# calculate variance for closing price over a given date range
+def calculate_variance(df, from_date, to_date):
+    return df[df['Date'] >= from_date][df['Date'] <= to_date]['Close'].var()
+
+# calculate std dev for closing price over a given date range
+def calculate_std_dev(df, from_date, to_date):
+    return df[df['Date'] >= from_date][df['Date'] <= to_date]['Close'].std()
+
+# calculate correlation between two stocks over a given date range
+def correlation_between(stock_df_1, stock_df_2):
+    # Merge the two dataframes on Date to ensure aligned data
+    merged = pd.merge(stock_df_1[['Date', 'Close']], 
+                     stock_df_2[['Date', 'Close']], 
+                     on='Date', 
+                     suffixes=('_1', '_2'))
+    
+    # Calculate correlation between closing prices
+    return merged['Close_1'].corr(merged['Close_2'])
+
+def correlation_matrix(stocks):
+    # Get list of symbols for labels
+    symbols = [stock['Ticker'].iloc[0] for stock in stocks]  # Get first value since Symbol is repeated
+    
+    # Create empty matrix using nested list comprehension
+    matrix = [[correlation_between(stocks[i], stocks[j]) 
+               for j in range(len(stocks))] 
+               for i in range(len(stocks))]
+    
+    # Convert to DataFrame with labels
+    corr_df = pd.DataFrame(matrix, index=symbols, columns=symbols)
+    
+    return corr_df
+
