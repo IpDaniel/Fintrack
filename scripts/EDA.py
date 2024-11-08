@@ -1,6 +1,5 @@
 import pandas as pd
 import matplotlib.pyplot as plt
-import seaborn as sns
 
 # calculate and plot closing and returns over time with dual y-axis graph
 def visualize_closing_and_returns(df):
@@ -80,4 +79,3 @@ def correlation_matrix(stocks):
     corr_df = pd.DataFrame(matrix, index=symbols, columns=symbols)
     
     return corr_df
-
