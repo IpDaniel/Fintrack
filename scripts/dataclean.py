@@ -1,4 +1,5 @@
 import pandas as pd
+import yfinance as yf
 
 #df = pd.read_csv('data/cleaned_data.csv')
 
@@ -64,6 +65,27 @@ def add_money_flow(df):
 # Extract and clean data for a specific stock
 def extract_and_clean_data(df, ticker):
     stock_df = extract_stock_data(df, ticker=ticker) # extract data for a single stock
+
+    # check to make sure all rows in the dataframe have the same ticker value
+    check_header_consistency(stock_df)
+    check_ticker_consistency(stock_df, ticker=ticker)
+
+    stock_df = forward_fill_missing_values(stock_df) # forward fill missing values
+    stock_df = add_closing_returns(stock_df) # add closing returns
+    stock_df = add_money_flow(stock_df) # add money flow (trading volume in dollars estimated with closing price and share volume)
+    return stock_df
+
+def download_and_clean_stock_data(ticker, start_date=None, end_date=None, interval='1d',headers=['Date', 'Ticker', 'Open', 'High', 'Low', 'Close', 'Volume']):
+    # Get stock price data
+    stock_data = yf.download(ticker, start=start_date, end=end_date, progress=False, interval=interval)
+    stock_df = stock_data.reset_index()
+    stock_df['Ticker'] = ticker
+
+    # Get fundamental data
+    ticker_info = yf.Ticker(ticker).info
+    stock_df['Dividend_Rate'] = ticker_info.get('dividendRate', None)
+    stock_df['PB_Ratio'] = ticker_info.get('priceToBook', None)
+    stock_df['PE_Ratio'] = ticker_info.get('trailingPE', None)
 
     # check to make sure all rows in the dataframe have the same ticker value
     check_header_consistency(stock_df)
