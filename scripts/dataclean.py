@@ -58,7 +58,7 @@ def add_closing_returns(df):
 def add_money_flow(df):
     # Create an explicit copy
     df = df.copy()
-    df.loc[:, 'Money_Flow'] = df['Volume'] * df['Close']
+    df.loc[:, 'Money_Flow'] = df['Volume'] * ((df['Close'] + df['Open']) / 2)
     return df
 
 # Extract and clean data for a specific stock

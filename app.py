@@ -20,3 +20,4 @@ wmt_df = extract_and_clean_data(df, 'WMT') # extract and clean data for Walmart
 
 print(correlation_matrix([aapl_df, googl_df, wmt_df]))
 
+visualize_closing_and_returns(aapl_df)
