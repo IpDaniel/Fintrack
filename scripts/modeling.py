@@ -70,6 +70,7 @@ def moving_average_analysis(df, ticker, short_window=20, long_window=50):
 
     return df# Volume, return, opening, close.
 
-import numpy as np
+def monte_carlo_model():
+    print("model goes here")
 
 
