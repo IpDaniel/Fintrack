@@ -71,7 +71,10 @@ def extract_and_clean_data(df, ticker):
     check_ticker_consistency(stock_df, ticker=ticker)
 
     stock_df = forward_fill_missing_values(stock_df) # forward fill missing values
+
     stock_df = add_closing_returns(stock_df) # add closing returns
+    stock_df["Returns"].iloc[0] = 0 # forward fill missing values
+
     stock_df = add_money_flow(stock_df) # add money flow (trading volume in dollars estimated with closing price and share volume)
     return stock_df
 
