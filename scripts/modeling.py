@@ -1,75 +1,125 @@
 # imports
 import pandas as pd
-import matplotlib.pyplot as plt
+import plotly.graph_objects as go
+import garch.py as garch
+from arch import arch_model
+import numpy as np
 
-
-# calculate moving averages
 def calculate_moving_averages(df, short_window=20, long_window=50):
-
     # Short-term moving average (e.g., 20 days)
     df['Short_MA'] = df['Close'].rolling(window=short_window, min_periods=1).mean()
     
     # Long-term moving average (e.g., 50 days)
     df['Long_MA'] = df['Close'].rolling(window=long_window, min_periods=1).mean()
-
     return df
 
-
-# Function to identify crossover points
 def identify_crossovers(df):
     df['Crossover'] = ((df['Short_MA'] > df['Long_MA']) & 
                        (df['Short_MA'].shift(1) <= df['Long_MA'].shift(1)))
-
     return df
 
-# Function to plot stock prices and moving averages
 def plot_moving_averages(df, ticker):
-   
-    plt.figure(figsize=(12, 6))
+    # Create the figure
+    fig = go.Figure()
     
-    # Plot the closing price
-    plt.plot(df['Date'], df['Close'], label=f'{ticker} Closing Price', alpha=0.5, color='blue')
+    # Add closing price
+    fig.add_trace(
+        go.Scatter(
+            x=df.index,  # Changed from df['Date'] to df.index for Streamlit compatibility
+            y=df['Close'],
+            name=f'{ticker} Closing Price',
+            line=dict(color='blue', width=1),
+            opacity=0.7
+        )
+    )
     
-    # Plot the short-term moving average
-    plt.plot(df['Date'], df['Short_MA'], label='Short-Term MA (20 days)', linestyle='--', color='green')
+    # Add short-term moving average
+    fig.add_trace(
+        go.Scatter(
+            x=df.index,
+            y=df['Short_MA'],
+            name='Short-Term MA (20 days)',
+            line=dict(color='green', width=1, dash='dash')
+        )
+    )
     
-    # Plot the long-term moving average
-    plt.plot(df['Date'], df['Long_MA'], label='Long-Term MA (50 days)', linestyle='--', color='red')
+    # Add long-term moving average
+    fig.add_trace(
+        go.Scatter(
+            x=df.index,
+            y=df['Long_MA'],
+            name='Long-Term MA (50 days)',
+            line=dict(color='red', width=1, dash='dash')
+        )
+    )
     
-    # Highlight crossover points
+    # Add crossover points
     crossover_points = df[df['Crossover']]
-    plt.scatter(crossover_points['Date'], crossover_points['Close'], 
-                label='Crossover', color='red', zorder=5)
-
-    # Title and labels
-    plt.title(f'{ticker} Moving Averages', fontsize=16)
-    plt.xlabel('Date', fontsize=12)
-    plt.ylabel('Price', fontsize=12)
+    fig.add_trace(
+        go.Scatter(
+            x=crossover_points.index,
+            y=crossover_points['Close'],
+            mode='markers',
+            name='Crossover Points',
+            marker=dict(
+                color='red',
+                size=8,
+                symbol='circle'
+            )
+        )
+    )
     
-    # Add legend
-    plt.legend()
+    # Update layout
+    fig.update_layout(
+        title=dict(
+            text=f'{ticker} Moving Averages',
+            x=0.5,
+            font=dict(size=20)
+        ),
+        xaxis_title='Date',
+        yaxis_title='Price',
+        hovermode='x unified',
+        showlegend=True,
+        template='plotly_white',
+        height=600,
+        xaxis=dict(rangeslider=dict(visible=True))
+    )
     
-    # Add grid for readability
-    plt.grid()
-    
-    # Display the plot
-    plt.show()
+    return fig
 
-
-# Main function to calculate, identify, and plot moving averages
 def moving_average_analysis(df, ticker, short_window=20, long_window=50):
-
-    # Calculate moving averages
     df = calculate_moving_averages(df, short_window, long_window)
-
-    # Identify crossover points
     df = identify_crossovers(df)
+    return plot_moving_averages(df, ticker)  # Return the figure instead of showing it
 
-    # Plot results
-    plot_moving_averages(df, ticker)
+def monte_carlo_simulation(df, days, iterations, mean):
+    framework = np.zeros((iterations, days))  # matrix for storing price paths
+    framework[:, 0] = df["Price"].iloc[-1]  # Start with the last known price
+    
+    df, omega, alpha, beta = calculate_future_variance(df)
+    
+    # Drift is the mean log return from historical data
+    drift = np.mean(df["log_returns"])
+    
+    z_shocks = np.random.normal(0, 1, (iterations, days - 1))  # random normal shocks for each path
+    
+    # Loop through each day to simulate the price path
+    for i in range(1, days):
+        # previous days shock
+        shock = df["log_returns"].iloc[i-1] - drift  # The shock (log returns difference)
+        shock_squared = shock**2  # Squared shock to update volatility
+        
+        # Update the conditional volatility using GARCH model
+        conditional_volatility = omega + alpha * shock_squared + beta * conditonal_volatility
+        
+        # Update the price paths using the GBM model
+        framework[:, i] = framework[:, i-1] * np.exp(
+            (drift - 0.5 * conditional_volatility) + np.sqrt(conditional_volatility) * z_shocks[:, i-1]
+        )
+    
+    return framework
 
-    return df# Volume, return, opening, close.
-
-import numpy as np
-
-
+    
+    
+    
+    

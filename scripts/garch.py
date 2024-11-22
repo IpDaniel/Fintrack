@@ -25,7 +25,7 @@ def collect_coefficients(df):
     # it for the coefficients because they'd be a pain in the ass to calculate by ourselves
     # p is the number of lagged parts and q is the order of arch
     # because we;re using a garch(1,1) model we only are using one at a time
-    model = arch_model(df['Returns'], vol='Garch', p=1, q=1)
+    model = arch_model(df['log_returns'], vol='Garch', p=1, q=1)
     model_fit = model.fit()
     params = model_fit.params
     return params["omega"], params["alpha[1]"], params["beta[1]"]
@@ -54,6 +54,17 @@ def calculate_cond_variance(df, beta=beta, alpha=alpha, omega=omega):
         conditional.append(omega + alpha * r_squared[i-1] + conditional[i-1])
     df["Conditional"] = conditional
     return df 
+
+def calculate_future_variance(df):
+    df["log_returns"] =  aapl_df["Returns"].apply(lambda x: create_log_returns(x))
+    df["squared_return"] =  aapl_df["log_returns"].apply(lambda x: create_squared_returns(x))
+    omega, alpha, beta = collect_coefficients(df)
+    df = calculate_cond_variance(df)
+    return df, omega, alpha, beta
+        
+    
+    
+    
 
 df = calculate_cond_variance(aapl_df)
 
