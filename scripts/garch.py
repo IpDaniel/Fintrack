@@ -42,6 +42,7 @@ def create_squared_returns(log_ret):
     return sqaured
 
 # example log return
+print(aapl_df.head())
 aapl_df["log_returns"] =  aapl_df["Returns"].apply(lambda x: create_log_returns(x))
 aapl_df["squared_return"] =  aapl_df["log_returns"].apply(lambda x: create_squared_returns(x))
 omega, alpha, beta = collect_coefficients(aapl_df)
