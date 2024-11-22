@@ -1,6 +1,9 @@
 # imports
 import pandas as pd
 import plotly.graph_objects as go
+import garch.py as garch
+from arch import arch_model
+import numpy as np
 
 def calculate_moving_averages(df, short_window=20, long_window=50):
     # Short-term moving average (e.g., 20 days)
@@ -88,3 +91,51 @@ def moving_average_analysis(df, ticker, short_window=20, long_window=50):
     df = calculate_moving_averages(df, short_window, long_window)
     df = identify_crossovers(df)
     return plot_moving_averages(df, ticker)  # Return the figure instead of showing it
+
+def monte_carlo_simulation(df, days, iterations, mean):
+    framework = np.zeros((iterations, days)) # setting the frameworkf or price paths
+    framework[:, 0] = df["Price"].iloc[-1]
+    df, omega, alpha, beta = calculate_future_variance(df)
+    drift = np.mean(df["log_returns"])
+    z_shocks = np.random.normal(0, 1, (simulations, days - 1))
+
+    for i in range(1, days):
+        shock = framework[:, i-1] - mu # finding the variance
+        shock_squared = shock**2 # getting the standard deviation
+        conditional_volatility = omega + alpha * np.mean(shock) + beta * volatility
+        framework[:, i] = asset_price_paths[: , i-1] * np.exp(
+        (mu - 0.5 * volatility) * delta_t + np.sqrt(volatility) * np.sqrt(delta_t) * z_schocks[:, i-1])
+        return framework
+import numpy as np
+
+def monte_carlo_simulation(df, days, iterations, mean):
+    framework = np.zeros((iterations, days))  # matrix for storing price paths
+    framework[:, 0] = df["Price"].iloc[-1]  # Start with the last known price
+    
+    df, omega, alpha, beta = calculate_future_variance(df)
+    
+    # Drift is the mean log return from historical data
+    drift = np.mean(df["log_returns"])
+    
+    z_shocks = np.random.normal(0, 1, (iterations, days - 1))  # random normal shocks for each path
+    
+    # Loop through each day to simulate the price path
+    for i in range(1, days):
+        # previous days shock
+        shock = df["log_returns"].iloc[i-1] - drift  # The shock (log returns difference)
+        shock_squared = shock**2  # Squared shock to update volatility
+        
+        # Update the conditional volatility using GARCH model
+        conditional_volatility = omega + alpha * shock_squared + beta * conditonal_volatility
+        
+        # Update the price paths using the GBM model
+        framework[:, i] = framework[:, i-1] * np.exp(
+            (drift - 0.5 * conditional_volatility) + np.sqrt(conditional_volatility) * z_shocks[:, i-1]
+        )
+    
+    return framework
+
+    
+    
+    
+    
