@@ -86,6 +86,12 @@ def download_and_clean_stock_data(ticker, start_date=None, end_date=None, interv
     stock_df['Dividend_Rate'] = ticker_info.get('dividendRate', None)
     stock_df['PB_Ratio'] = ticker_info.get('priceToBook', None)
     stock_df['PE_Ratio'] = ticker_info.get('trailingPE', None)
+    stock_df['Dividend_Yield'] = ticker_info.get('dividendYield', None)
+    stock_df['Beta'] = ticker_info.get('beta', None)
+    stock_df['Fifty_Two_Week_High'] = ticker_info.get('fiftyTwoWeekHigh', None)
+    stock_df['Total_Revenue'] = ticker_info.get('totalRevenue', None)
+    stock_df['Profit_Margins'] = ticker_info.get('profitMargins', None)
+    stock_df['Debt_to_Equity'] = ticker_info.get('debtToEquity', None)
 
     # check to make sure all rows in the dataframe have the same ticker value
     check_header_consistency(stock_df)
