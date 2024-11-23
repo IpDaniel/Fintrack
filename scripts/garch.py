@@ -57,8 +57,8 @@ def calculate_cond_variance(df, beta=beta, alpha=alpha, omega=omega):
     return df 
 
 def calculate_future_variance(df):
-    df["log_returns"] =  aapl_df["Returns"].apply(lambda x: create_log_returns(x))
-    df["squared_return"] =  aapl_df["log_returns"].apply(lambda x: create_squared_returns(x))
+    df["log_returns"] =  df["Returns"].apply(lambda x: create_log_returns(x))
+    df["squared_return"] =  df["log_returns"].apply(lambda x: create_squared_returns(x))
     omega, alpha, beta = collect_coefficients(df)
     df = calculate_cond_variance(df)
     return df, omega, alpha, beta

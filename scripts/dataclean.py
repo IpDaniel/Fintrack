@@ -83,6 +83,9 @@ def download_and_clean_stock_data(ticker, start_date=None, end_date=None, interv
     stock_data = yf.download(ticker, start=start_date, end=end_date, progress=False, interval=interval)
     stock_df = stock_data.reset_index()
     stock_df['Ticker'] = ticker
+    stock_df = add_closing_returns(stock_df) # add closing returns
+    stock_df["Returns"].iloc[0] = 0 # forward fill missing values
+    stock_df = add_money_flow(stock_df)
 
     # Get fundamental data
     ticker_info = yf.Ticker(ticker).info
