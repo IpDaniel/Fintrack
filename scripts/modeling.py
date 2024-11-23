@@ -4,6 +4,8 @@ import plotly.graph_objects as go
 from garch import *  
 from arch import arch_model
 import numpy as np
+from datetime import datetime, timedelta
+
 
 def calculate_moving_averages(df, short_window=20, long_window=50):
     # Short-term moving average (e.g., 20 days)
@@ -102,7 +104,8 @@ def monte_carlo_simulation(df, days, iterations):
     drift = np.mean(df["log_returns"])
     
     z_shocks = np.random.normal(0, 1, (iterations, days - 1))  # random normal shocks for each path
-    conditional_volatility = df["Conditional"].iloc[-1]
+    conditional_volatility = conditional_volatility = np.mean(df["Conditional"].to_numpy())
+
     drift_matrix = np.full((iterations, df.shape[0]), drift)
     print(drift_matrix.shape)
 
@@ -137,8 +140,8 @@ def monte_carlo_simulation(df, days, iterations):
                 )
             )
 
-        # Add each simulation path as a trace
-    for i in range(framework.shape[0]):  # Iterate over each simulation
+    # THIS IS AREA TO ADD BOOLEAN PREDICATE TO ADD ALL RESULTS INSTEAD OF MEAN
+    """for i in range(framework.shape[0]):  # Iterate over each simulation
         fig.add_trace(
             go.Scatter(
                 x=x_days,  # Days as the x-axis
@@ -147,7 +150,7 @@ def monte_carlo_simulation(df, days, iterations):
                 name=f"Simulation {i + 1}",
                 line=dict(width=1.5)  # Customize line width
                 )
-            )
+            )"""
 
         # Customize the layout
     fig.update_layout(
@@ -165,7 +168,10 @@ def monte_carlo_simulation(df, days, iterations):
     print(framework[1, :])
     return framework
 
-aapl_df = extract_and_clean_data(df, 'AAPL')
+start_date = datetime(2024, 1, 1)  # Example start date
+
+end_date = start_date + timedelta(days=256)
+appl_df = download_and_organize_data(['POWL'], start_date, end_date, interval='1d')
 monte = monte_carlo_simulation(aapl_df, 100, 100)
 print(monte.shape)
     
